@@ -70,6 +70,4 @@ assign accept_o      = (count_q != DEPTH);
 assign data_out_o    = ram_q[rd_ptr_q];
 assign level_o       = count_q;
 
-
-
 endmodule
