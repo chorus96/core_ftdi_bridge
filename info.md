@@ -1,0 +1,3 @@
+- Devices such as the FT2232 must be switched into FIFO mode using the FT_PROG EEPROM programming tool from FTDI.  
+- The choice between asychronous and synchronous mode for FTDI devices which support it are done at runtime via the ftdi_set_bitmode API.
+- https://www.ftdichip.com/Support/Documents/TechnicalNotes/TN_167_FIFO_Basics.pdf
