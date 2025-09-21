@@ -119,9 +119,6 @@ begin
     next_state_r = state_q;
 
     case (state_q)
-    //-----------------------------------------
-    // STATE_IDLE
-    //-----------------------------------------
     STATE_IDLE :
     begin
         if (rx_ready_w && rx_space_w)
@@ -129,17 +126,11 @@ begin
         else if (tx_space_w && (tx_valid_w || tx_valid_q))
             next_state_r    = STATE_TX;
     end
-    //-----------------------------------------
-    // STATE_RX
-    //-----------------------------------------
     STATE_RX :
     begin
         if (!rx_ready_w || rx_full_next_w)
             next_state_r  = STATE_IDLE;
     end
-    //-----------------------------------------
-    // STATE_TX
-    //-----------------------------------------
     STATE_TX :
     begin
         if (!tx_space_w || tx_empty_next_w)

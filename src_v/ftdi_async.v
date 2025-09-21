@@ -116,9 +116,6 @@ begin
     next_state_r = state_q;
 
     case (state_q)
-    //-----------------------------------------
-    // STATE_IDLE
-    //-----------------------------------------
     STATE_IDLE :
     begin
         if (rx_start_w)
@@ -126,25 +123,16 @@ begin
         else if (tx_start_w)
             next_state_r    = STATE_TX_SETUP;
     end
-    //-----------------------------------------
-    // STATE_RX
-    //-----------------------------------------
     STATE_RX :
     begin
         if (clk_en_w)
             next_state_r  = STATE_IDLE;
     end
-    //-----------------------------------------
-    // STATE_TX_SETUP
-    //-----------------------------------------
     STATE_TX_SETUP :
     begin
         if (clk_en_w)
             next_state_r  = STATE_TX;
     end
-    //-----------------------------------------
-    // STATE_TX
-    //-----------------------------------------
     STATE_TX :
     begin
         if (clk_en_w)

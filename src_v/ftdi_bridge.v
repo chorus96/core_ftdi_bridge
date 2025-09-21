@@ -138,17 +138,11 @@ begin
     next_state_r = state_q;
 
     case (state_q)
-    //-----------------------------------------
-    // STATE_IDLE
-    //-----------------------------------------
     STATE_IDLE :
     begin
         if (rx_ready_w)
             next_state_r    = STATE_CMD;
     end
-    //-----------------------------------------
-    // STATE_CMD
-    //-----------------------------------------
     STATE_CMD :
     begin
         if (data_rx_w[`CMD_R] == CMD_NOP)
@@ -162,17 +156,11 @@ begin
         else
             next_state_r  = STATE_IDLE;
     end
-    //-----------------------------------------
-    // STATE_LEN
-    //-----------------------------------------
     STATE_LEN :
     begin
         if (rx_ready_w)
             next_state_r  = STATE_ADDR0;
     end
-    //-----------------------------------------
-    // STATE_ADDR
-    //-----------------------------------------
     STATE_ADDR0 : if (rx_ready_w) next_state_r  = STATE_ADDR1;
     STATE_ADDR1 : if (rx_ready_w) next_state_r  = STATE_ADDR2;
     STATE_ADDR2 : if (rx_ready_w) next_state_r  = STATE_ADDR3;
@@ -183,9 +171,6 @@ begin
         else if (rx_ready_w) 
             next_state_r  = STATE_READ;            
     end
-    //-----------------------------------------
-    // STATE_WRITE
-    //-----------------------------------------
     STATE_WRITE :
     begin
         if (len_q == {LEN_W{1'b0}} && (mem_bvalid_i || magic_addr_w))
@@ -193,18 +178,12 @@ begin
         else
             next_state_r  = STATE_WRITE;
     end
-    //-----------------------------------------
-    // STATE_READ
-    //-----------------------------------------
     STATE_READ :
     begin
         // Data ready
         if (mem_rvalid_i || magic_addr_w)
             next_state_r  = STATE_DATA0;
     end
-    //-----------------------------------------
-    // STATE_DATA
-    //-----------------------------------------
     STATE_DATA0 :
     begin
         if (read_skip_w)
@@ -239,17 +218,11 @@ begin
         else if (wr_accept_w)
             next_state_r  = STATE_IDLE;
     end
-    //-----------------------------------------
-    // STATE_GP_WR
-    //-----------------------------------------
     STATE_GP_WR :
     begin
         if (rx_ready_w)
             next_state_r  = STATE_IDLE;
     end
-    //-----------------------------------------
-    // STATE_GP_RD
-    //-----------------------------------------
     STATE_GP_RD :
     begin
         if (wr_accept_w)
