@@ -1,8 +1,8 @@
+`timescale 1ns/1ps  
+
 module ftdi_bridge
 #(
-     parameter MODE             = "SYNC"
-    ,parameter CLK_DIV          = 2
-    ,parameter GP_OUTPUTS       = 32
+     parameter GP_OUTPUTS       = 32
     ,parameter GP_INPUTS        = 32
     ,parameter GPIO_ADDRESS     = 32'hf0000000
     ,parameter GP_IN_EVENT_MASK = 0
@@ -531,9 +531,6 @@ if (rst_i)
 else
     gp_in_q <= gp_in_r;
 
-generate 
-if (MODE == "SYNC")
-begin // FT245: Sync FIFO mode
     ftdi_sync
     u_sync
     (
@@ -560,37 +557,5 @@ begin // FT245: Sync FIFO mode
         .inport_data_i(data_tx_w),
         .inport_accept_o(wr_accept_w)
     );
-end
-else
-begin // FT245: Async FIFO mode
-    ftdi_async
-    #( .CLK_DIV(CLK_DIV) )
-    u_async
-    (
-        .clk_i(clk_i),
-        .rst_i(rst_i),
-
-        // FTDI (async FIFO interface)
-        .ftdi_rxf_i(ftdi_rxf_i),
-        .ftdi_txe_i(ftdi_txe_i),
-        .ftdi_siwua_o(ftdi_siwua_o),
-        .ftdi_wrn_o(ftdi_wrn_o),
-        .ftdi_rdn_o(ftdi_rdn_o),
-        .ftdi_oen_o(ftdi_oen_o),
-        .ftdi_data_out_o(ftdi_data_out_o),
-        .ftdi_data_in_i(ftdi_data_in_i),
-
-        // Receive data
-        .outport_valid_o(rx_ready_w),
-        .outport_data_o(data_rx_w),
-        .outport_accept_i(rd_w),
-
-        // Transmit data
-        .inport_valid_i(wr_w),
-        .inport_data_i(data_tx_w),
-        .inport_accept_o(wr_accept_w)
-    );
-end
-endgenerate
 
 endmodule

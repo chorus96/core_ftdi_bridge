@@ -1,3 +1,5 @@
+`timescale 1ns/1ps  
+
 module ftdi_top(
      input  ftdi_clk_i
     ,input  ftdi_rst_i

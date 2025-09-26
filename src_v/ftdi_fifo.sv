@@ -1,3 +1,5 @@
+`timescale 1ns/1ps  
+
 module ftdi_fifo
 #(
     parameter WIDTH   = 8,
