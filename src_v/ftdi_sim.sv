@@ -10,6 +10,10 @@ wire        ftdi_rdn_w    ;
 wire        ftdi_oen_w    ;  
 wire  [7:0] ftdi_data_io_w;  
 
+initial begin
+    $display("Starting FTDI simulation");
+end 
+
 ftdi_top u_ftdi_top
 (
      .ftdi_clk_i  (ftdi_clk_w    )
