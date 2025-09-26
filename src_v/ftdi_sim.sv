@@ -15,6 +15,8 @@ wire  [7:0] ftdi_data_io_w;
 initial begin
     $display("Starting FTDI simulation");
     #100ns;
+    u_um232h_bfm.rst();
+    #100us;
     $finish();
 end 
 

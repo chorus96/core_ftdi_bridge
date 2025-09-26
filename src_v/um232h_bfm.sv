@@ -1,6 +1,8 @@
 `timescale 1ns/1ps  
 
-module um232h_bfm(
+module um232h_bfm
+    import ftdi_pkg::*;
+(
      output reg  ftdi_clk_o
     ,output reg  ftdi_rst_o
     ,output ftdi_rxf_o
@@ -14,12 +16,18 @@ module um232h_bfm(
 
 initial begin
     ftdi_clk_o = 0;
-end 
-
-initial begin
+    ftdi_rst_o = 0;
     forever begin
         #10ns ftdi_clk_o = ~ftdi_clk_o;
     end
+end 
+
+task rst;
+begin
+    ftdi_rst_o = 1;
+    #100ns;
+    ftdi_rst_o = 0;
 end
+endtask
 
 endmodule

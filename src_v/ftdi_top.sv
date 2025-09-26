@@ -17,7 +17,6 @@ wire [7:0] ftdi_data_out_w;
 
 ftdi_bridge
 #(
-	.MODE("SYNC")
 )
 u_bridge
 (

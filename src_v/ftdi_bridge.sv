@@ -1,6 +1,8 @@
 `timescale 1ns/1ps  
+`include "ftdi_pkg.sv"
 
 module ftdi_bridge
+    import ftdi_pkg::*;
 #(
      parameter GP_OUTPUTS       = 32
     ,parameter GP_INPUTS        = 32
@@ -53,22 +55,9 @@ module ftdi_bridge
     ,output [ 31:0]  gp_outputs_o
 );
 
-
 //-----------------------------------------------------------------
 // Defines / Local params
 //-----------------------------------------------------------------
-localparam CMD_NOP          = 4'd0;
-localparam CMD_WR           = 4'd1;
-localparam CMD_RD           = 4'd2;
-localparam CMD_GP_WR        = 4'd3;
-localparam CMD_GP_RD        = 4'd4;
-localparam CMD_GP_RD_CLR    = 4'd5;
-localparam CMD_STREAM_ON    = 4'd6;
-localparam CMD_STREAM_OFF   = 4'd7;
-
-`define CMD_R               3:0
-`define LEN_UPPER_R         7:4
-`define LEN_LOWER_R         7:0
 
 localparam LEN_W            = 12;
 
