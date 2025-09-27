@@ -30,7 +30,6 @@ module ftdi_bridge
     ,input           mem_rlast_i
     ,input  [ 31:0]  gp_inputs_i
 
-    // Outputs
     ,output          ftdi_siwua_o
     ,output          ftdi_wrn_o
     ,output          ftdi_rdn_o

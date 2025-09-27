@@ -2,10 +2,10 @@
 
 module ftdi_fifo
 #(
-    parameter WIDTH   = 8,
-    parameter DEPTH   = 4,
-    parameter ADDR_W  = 2,
-    parameter COUNT_W = 3
+     parameter WIDTH   = 8
+    ,parameter DEPTH   = 64
+    ,parameter ADDR_W  = 6
+    ,parameter COUNT_W = 7
 )
 (
     // Inputs

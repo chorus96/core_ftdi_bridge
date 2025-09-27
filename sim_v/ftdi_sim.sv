@@ -17,6 +17,7 @@ initial begin
     #100ns;
     u_um232h_bfm.rst();
     #100us;
+    $display("Finishing FTDI simulation");
     $finish();
 end 
 

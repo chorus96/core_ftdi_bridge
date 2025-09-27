@@ -1,6 +1,5 @@
 ### FTDI FT245 Style Synchronous/Asynchronous FIFO Bridge
-
-This component provides a bridge from the FTDI Asynchronous or Synchronous FIFO interface (such as found on the FT245 or FT2232) to an AXI4 master & GPIO interface.
+This component provides a bridge from the FTDI Synchronous FIFO interface (such as found on the FT245 or FT2232) to an AXI4 master & GPIO interface.
 
 Devices such as the FT2232 must be switched into FIFO mode using the FT_PROG EEPROM programming tool from FTDI.  
 The choice between asychronous and synchronous mode for FTDI devices which support it are done at runtime via the ftdi_set_bitmode API.
@@ -23,16 +22,14 @@ See [TN_167 FIFO Basics](https://www.ftdichip.com/Support/Documents/TechnicalNot
 ##### Testing
 
 Verified under simulation and validated on FPGA.  
-Used on the miniSpartan6+ board which uses the FTDI FT2232HL (asynchronous mode), and using an Xilinx Artix 7 board with FTDI FT2232HL (synchronous mode).
+Used on the miniSpartan6+ board which using an Xilinx Artix 7 board with FTDI FT2232HL (synchronous mode).
 
 ##### Configuration
 * Top: ftdi_bridge
 * Clock: clk_i - Must be sourced from FTDI device for mode = SYNC
 * Reset: rst_i - Asynchronous, active high
-* parameter MODE - "SYNC" or "ASYNC" FT245 mode
-* parameter CLK_DIV - Clock divider (minimum is 2) (only valid for MODE="ASYNC")
-* parameter GP_OUTPUTS - Number of GPIO outputs (1 - 8)
-* parameter GP_INPUTS - Number of GPIO inputs (1 - 8)
+* parameter GP_OUTPUTS - Number of GPIO outputs (1 - 32)
+* parameter GP_INPUTS - Number of GPIO inputs (1 - 32)
 * parameter AXI_ID - AXI ID to use
 
 ##### Size / Speed
@@ -53,9 +50,6 @@ wire [7:0] ftdi_data_in_w;
 wire [7:0] ftdi_data_out_w;
 
 ftdi_bridge
-#(
-	.MODE("SYNC")
-)
 u_bridge
 (
      .clk_i(ftdi_clk_i)
