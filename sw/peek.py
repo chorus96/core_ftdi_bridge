@@ -4,13 +4,10 @@ import argparse
 
 from bus_interface import *
 
-##################################################################
-# Main
-##################################################################
 def main(argv):
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', dest='type',   default='ftdi',                     help='Device type (ftdi_async|ftdi)')
+    parser.add_argument('-t', dest='type',   default='ftdi',                     help='Device type (ftdi|emul)')
     parser.add_argument('-d', dest='device', default='',                         help='Device ID serial.iface_id (e.g. FT3XO4LY.1 or FT3XO4LY.0)')
     parser.add_argument('-a', dest='address',required=True,                      help='Address to read')
     parser.add_argument('-q', dest='quiet',  action='store_true', default=False, help='Quiet mode - set exit code to read value')

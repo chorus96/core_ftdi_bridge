@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "poke.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/sw/poke.py",
+            "console": "integratedTerminal",
+            "args": "-t emul -a 0x0 -v 0x12345678"
+        },
+        {
+            "name": "peek.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/sw/peek.py",
+            "console": "integratedTerminal",
+            "args": "-t emul -a 0x0"
+        },
+        {
+            "name": "Python 디버거: 인수가 있는 현재 파일",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Python Debugger: Python File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}"
+        }
+    ]
+}

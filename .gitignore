@@ -1,3 +1,4 @@
 icarus/
 netlist/
 out/
+**/__pycache__/

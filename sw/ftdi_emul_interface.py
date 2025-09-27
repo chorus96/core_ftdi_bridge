@@ -1,7 +1,7 @@
 from pylibftdi import Device, Driver
 import time
 
-class FtdiSyncInterface: # FTDI Sync FIFO -> Bus master interface
+class FtdiEmulInterface: # FTDI Sync FIFO -> Bus master interface
     def __init__(self, iface = None):
         self.interface  = iface
         self.target     = None
@@ -23,22 +23,18 @@ class FtdiSyncInterface: # FTDI Sync FIFO -> Bus master interface
             self.dev_id = iface
 
     def connect(self): # Open serial connection
-        self.target = Device(device_id=self.dev_id,interface_select=1)
-        self.target.flush()
-        time.sleep(0.01)
+        # self.target = Device(device_id=self.dev_id,interface_select=1)
+        # self.target.flush()
+        # time.sleep(0.01)
 
         BITMODE_SYNCFF = 0x40
         SIO_RTS_CTS_HS = (0x1 << 8)
-        self.target.ftdi_fn.ftdi_set_bitmode(0, BITMODE_SYNCFF)
-        self.target.ftdi_fn.ftdi_setflowctrl(SIO_RTS_CTS_HS)
-        self.target.flush()
+        # self.target.ftdi_fn.ftdi_set_bitmode(0, BITMODE_SYNCFF)
+        # self.target.ftdi_fn.ftdi_setflowctrl(SIO_RTS_CTS_HS)
+        # self.target.flush()
 
-    ##################################################################
-    # read32: Read a word from a specified address
-    ##################################################################
-    def read32(self, addr):
-        # Connect if required
-        if self.target == None:
+    def read32(self, addr): # Read a word from a specified address
+        if self.target == None: # Connect if required
             self.connect()
 
         # Send read command
@@ -48,23 +44,20 @@ class FtdiSyncInterface: # FTDI Sync FIFO -> Bus master interface
                         (addr >> 16) & 0xFF, 
                         (addr >> 8) & 0xFF, 
                         (addr >> 0) & 0xFF])
-        self.target.write(cmd)
+        # self.target.write(cmd)
 
         value = 0
         idx   = 0
         while (idx < 4):
-            b = self.target.read(1)
+            # b = self.target.read(1)
+            b = b'\x00'
             value |= (ord(b) << (idx * 8))
             idx += 1
 
         return value
 
-    ##################################################################
-    # write32: Write a word to a specified address
-    ##################################################################
-    def write32(self, addr, value):
-        # Connect if required
-        if self.target == None:
+    def write32(self, addr, value): # Write a word to a specified address
+        if self.target == None: # Connect if required
             self.connect()
 
         # Send write command
@@ -78,4 +71,4 @@ class FtdiSyncInterface: # FTDI Sync FIFO -> Bus master interface
                         (value >> 8)  & 0xFF, 
                         (value >> 16) & 0xFF, 
                         (value >> 24) & 0xFF])
-        self.target.write(cmd)
+        # self.target.write(cmd)
