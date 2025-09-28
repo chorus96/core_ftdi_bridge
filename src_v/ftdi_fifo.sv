@@ -20,9 +20,7 @@ module ftdi_fifo #(
     ,output [COUNT_W-1:0] level_o
 );
 
-//-----------------------------------------------------------------
-// Registers
-//-----------------------------------------------------------------
+/* Registers */
 reg [WIDTH-1:0]   ram_q[DEPTH-1:0];
 reg [ADDR_W-1:0]  rd_ptr_q;
 reg [ADDR_W-1:0]  wr_ptr_q;
