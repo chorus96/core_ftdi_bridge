@@ -79,7 +79,23 @@ localparam STATE_DATA2      = 4'd11;
 localparam STATE_DATA3      = 4'd12;
 localparam STATE_GP_WR      = 4'd13;
 localparam STATE_GP_RD      = 4'd14;
-
+// typedef enum logic [3:0] {
+//     STATE_IDLE       = 4'd0;
+//     STATE_CMD        = 4'd1;
+//     STATE_LEN        = 4'd2;
+//     STATE_ADDR0      = 4'd3;
+//     STATE_ADDR1      = 4'd4;
+//     STATE_ADDR2      = 4'd5;
+//     STATE_ADDR3      = 4'd6;
+//     STATE_WRITE      = 4'd7;
+//     STATE_READ       = 4'd8;
+//     STATE_DATA0      = 4'd9;
+//     STATE_DATA1      = 4'd10;
+//     STATE_DATA2      = 4'd11;
+//     STATE_DATA3      = 4'd12;
+//     STATE_GP_WR      = 4'd13;
+//     STATE_GP_RD      = 4'd14;
+// } cmd_e;
 //-----------------------------------------------------------------
 // Registers / Wires
 //-----------------------------------------------------------------
@@ -135,9 +151,10 @@ begin
             next_state_r  = STATE_IDLE;
         end else if (data_rx_w[`CMD_R] == CMD_WR || data_rx_w[`CMD_R] == CMD_RD)
             next_state_r  = STATE_LEN;
-        else if (data_rx_w[`CMD_R] == CMD_GP_WR)
+        else if (data_rx_w[`CMD_R] == CMD_GP_WR) begin
+            $display("GP_WR command received");
             next_state_r  = STATE_GP_WR;
-        else if (data_rx_w[`CMD_R] == CMD_GP_RD)
+        end else if (data_rx_w[`CMD_R] == CMD_GP_RD)
             next_state_r  = STATE_GP_RD;
         else
             next_state_r  = STATE_IDLE;

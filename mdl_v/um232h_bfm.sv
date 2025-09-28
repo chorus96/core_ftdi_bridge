@@ -18,10 +18,11 @@ reg [7:0] ftdi_data_r;
 assign ftdi_data_io = ftdi_oen_i ? 8'hZZ : ftdi_data_r;
 
 initial begin
-    ftdi_clk_o = 0;
-    ftdi_rst_o = 0;
-    ftdi_rxf_o = 1;
-    ftdi_txe_o = 1;
+    ftdi_clk_o  = 0;
+    ftdi_rst_o  = 0;
+    ftdi_rxf_o  = 1;
+    ftdi_txe_o  = 1;
+    ftdi_data_r = 8'hXX;
     forever #10ns ftdi_clk_o = ~ftdi_clk_o;
 end 
 
@@ -47,21 +48,49 @@ endtask
 
 task send_nop;
 begin
-    // ftdi_txe_o = 1;
-    // forever @(posedge ftdi_clk_o) begin
-    //     if (ftdi_wrn_i == 1) begin
-    //         ftdi_data_io = CMD_NOP;
-    //         break;
-    //     end
-    // end    
-    // ftdi_txe_o = 0;  
     @(negedge ftdi_clk_o);
     ftdi_rxf_o = 0;
     ftdi_data_r[`CMD_R] = CMD_NOP;
+    @(posedge ftdi_clk_o);
     wait(ftdi_rdn_i == 0);
     @(posedge ftdi_clk_o);
+    @(negedge ftdi_clk_o);
     ftdi_rxf_o = 1;  
 end
 endtask
+
+task send_gpio;
+begin
+    @(negedge ftdi_clk_o);
+    ftdi_rxf_o = 0;
+    ftdi_data_r[`CMD_R] = CMD_GP_WR;
+    @(posedge ftdi_clk_o);
+    wait(ftdi_rdn_i == 0);
+    @(posedge ftdi_clk_o);
+    ftdi_data_r[`LEN_LOWER_R] = 8'hFF;
+    @(posedge ftdi_clk_o);
+    @(negedge ftdi_clk_o);
+    ftdi_rxf_o = 1;  
+end
+endtask
+
+// task send_nop;
+// begin
+//     // ftdi_txe_o = 1;
+//     // forever @(posedge ftdi_clk_o) begin
+//     //     if (ftdi_wrn_i == 1) begin
+//     //         ftdi_data_io = CMD_NOP;
+//     //         break;
+//     //     end
+//     // end    
+//     // ftdi_txe_o = 0;  
+//     @(negedge ftdi_clk_o);
+//     ftdi_rxf_o = 0;
+//     ftdi_data_r[`CMD_R] = CMD_NOP;
+//     wait(ftdi_rdn_i == 0);
+//     @(posedge ftdi_clk_o);
+//     ftdi_rxf_o = 1;  
+// end
+// endtask
 
 endmodule
