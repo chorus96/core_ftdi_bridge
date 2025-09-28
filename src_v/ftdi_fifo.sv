@@ -1,13 +1,11 @@
 `timescale 1ns/1ps  
 
-module ftdi_fifo
-#(
+module ftdi_fifo #(
      parameter WIDTH   = 8
     ,parameter DEPTH   = 64
     ,parameter ADDR_W  = 6
     ,parameter COUNT_W = 7
-)
-(
+)(
     // Inputs
      input                clk_i
     ,input                rst_i
