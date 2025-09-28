@@ -32,17 +32,13 @@ reg [COUNT_W-1:0] count_q;
 // Sequential
 //-----------------------------------------------------------------
 always @ (posedge clk_i or posedge rst_i)
-if (rst_i)
-begin
+if (rst_i) begin
     count_q   <= {(COUNT_W) {1'b0}};
     rd_ptr_q  <= {(ADDR_W) {1'b0}};
     wr_ptr_q  <= {(ADDR_W) {1'b0}};
-end
-else
-begin
+end else begin
     // Push
-    if (push_i & accept_o)
-    begin
+    if (push_i & accept_o) begin
         ram_q[wr_ptr_q] <= data_in_i;
         wr_ptr_q        <= wr_ptr_q + 1;
     end
