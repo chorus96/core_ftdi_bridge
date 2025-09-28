@@ -6,14 +6,11 @@ module ftdi_fifo #(
     ,parameter ADDR_W  = 6
     ,parameter COUNT_W = 7
 )(
-    // Inputs
      input                clk_i
-    ,input                rst_i
+    ,input                rst_i   
     ,input  [WIDTH-1:0]   data_in_i
     ,input                push_i
-    ,input                pop_i
-
-    // Outputs
+    ,input                pop_i  
     ,output [WIDTH-1:0]   data_out_o
     ,output               accept_o
     ,output               valid_o
@@ -26,8 +23,7 @@ reg [ADDR_W-1:0]  rd_ptr_q;
 reg [ADDR_W-1:0]  wr_ptr_q;
 reg [COUNT_W-1:0] count_q;
 
-// Sequential
-//-------------------------------------------------------------
+/* Sequential */
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i) begin
     count_q   <= {(COUNT_W) {1'b0}};
