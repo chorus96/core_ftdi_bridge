@@ -26,9 +26,8 @@ reg [ADDR_W-1:0]  rd_ptr_q;
 reg [ADDR_W-1:0]  wr_ptr_q;
 reg [COUNT_W-1:0] count_q;
 
-//-----------------------------------------------------------------
 // Sequential
-//-----------------------------------------------------------------
+//-------------------------------------------------------------
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i) begin
     count_q   <= {(COUNT_W) {1'b0}};
@@ -53,9 +52,7 @@ end else begin
         count_q <= count_q - 1;
 end
 
-//-------------------------------------------------------------------
-// Combinatorial
-//-------------------------------------------------------------------
+/* Combinatorial */
 /* verilator lint_off WIDTH */
 assign valid_o       = (count_q != 0);
 assign accept_o      = (count_q != DEPTH);
