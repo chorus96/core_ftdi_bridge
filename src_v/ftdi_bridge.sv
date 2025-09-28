@@ -28,7 +28,6 @@ module ftdi_bridge
     ,input  [  1:0]  mem_rresp_i
     ,input  [  3:0]  mem_rid_i
     ,input           mem_rlast_i
-    ,input  [ 31:0]  gp_inputs_i
 
     ,output          ftdi_siwua_o
     ,output          ftdi_wrn_o
@@ -51,7 +50,9 @@ module ftdi_bridge
     ,output [  7:0]  mem_arlen_o
     ,output [  1:0]  mem_arburst_o
     ,output          mem_rready_o
-    ,output [ 31:0]  gp_outputs_o
+
+    ,input  [ GP_INPUTS-1:0]  gp_inputs_i
+    ,output [GP_OUTPUTS-1:0]  gp_outputs_o
 );
 
 //-----------------------------------------------------------------
@@ -126,16 +127,13 @@ begin
     next_state_r = state_q;
 
     case (state_q)
-    STATE_IDLE :
-    begin
-        if (rx_ready_w)
-            next_state_r    = STATE_CMD;
-    end
+    STATE_IDLE : if (rx_ready_w) next_state_r = STATE_CMD;
     STATE_CMD :
     begin
-        if (data_rx_w[`CMD_R] == CMD_NOP)
+        if (data_rx_w[`CMD_R] == CMD_NOP) begin
+            $display("NOP command received");
             next_state_r  = STATE_IDLE;
-        else if (data_rx_w[`CMD_R] == CMD_WR || data_rx_w[`CMD_R] == CMD_RD)
+        end else if (data_rx_w[`CMD_R] == CMD_WR || data_rx_w[`CMD_R] == CMD_RD)
             next_state_r  = STATE_LEN;
         else if (data_rx_w[`CMD_R] == CMD_GP_WR)
             next_state_r  = STATE_GP_WR;
@@ -144,11 +142,7 @@ begin
         else
             next_state_r  = STATE_IDLE;
     end
-    STATE_LEN :
-    begin
-        if (rx_ready_w)
-            next_state_r  = STATE_ADDR0;
-    end
+    STATE_LEN : if (rx_ready_w) next_state_r  = STATE_ADDR0;
     STATE_ADDR0 : if (rx_ready_w) next_state_r  = STATE_ADDR1;
     STATE_ADDR1 : if (rx_ready_w) next_state_r  = STATE_ADDR2;
     STATE_ADDR2 : if (rx_ready_w) next_state_r  = STATE_ADDR3;
@@ -221,12 +215,9 @@ begin
    endcase
 end
 
-// Update state
-always @ (posedge clk_i or posedge rst_i)
-if (rst_i)
-    state_q   <= STATE_IDLE;
-else
-    state_q   <= next_state_r;
+always @ (posedge clk_i or posedge rst_i) // Update state
+if (rst_i) state_q <= STATE_IDLE;
+else       state_q <= next_state_r;
 
 //-----------------------------------------------------------------
 // RD/WR to and from async FTDI I/F
@@ -519,31 +510,30 @@ if (rst_i)
 else
     gp_in_q <= gp_in_r;
 
-    ftdi_sync
-    u_sync
-    (
-        .clk_i(clk_i),
-        .rst_i(rst_i),
+ftdi_sync u_ftdi_sync
+(
+    .clk_i(clk_i),
+    .rst_i(rst_i),
 
-        // FTDI (Sync/245 FIFO) interface
-        .ftdi_rxf_i(ftdi_rxf_i),
-        .ftdi_txe_i(ftdi_txe_i),
-        .ftdi_siwua_o(ftdi_siwua_o),
-        .ftdi_wrn_o(ftdi_wrn_o),
-        .ftdi_rdn_o(ftdi_rdn_o),
-        .ftdi_oen_o(ftdi_oen_o),
-        .ftdi_data_out_o(ftdi_data_out_o),
-        .ftdi_data_in_i(ftdi_data_in_i),
+    // FTDI (Sync/245 FIFO) interface
+    .ftdi_rxf_i(ftdi_rxf_i),
+    .ftdi_txe_i(ftdi_txe_i),
+    .ftdi_siwua_o(ftdi_siwua_o),
+    .ftdi_wrn_o(ftdi_wrn_o),
+    .ftdi_rdn_o(ftdi_rdn_o),
+    .ftdi_oen_o(ftdi_oen_o),
+    .ftdi_data_out_o(ftdi_data_out_o),
+    .ftdi_data_in_i(ftdi_data_in_i),
 
-        // Receive data
-        .outport_valid_o(rx_ready_w),
-        .outport_data_o(data_rx_w),
-        .outport_accept_i(rd_w),
+    // Receive data
+    .outport_valid_o(rx_ready_w),
+    .outport_data_o(data_rx_w),
+    .outport_accept_i(rd_w),
 
-        // Transmit data
-        .inport_valid_i(wr_w),
-        .inport_data_i(data_tx_w),
-        .inport_accept_o(wr_accept_w)
-    );
+    // Transmit data
+    .inport_valid_i(wr_w),
+    .inport_data_i(data_tx_w),
+    .inport_accept_o(wr_accept_w)
+);
 
 endmodule

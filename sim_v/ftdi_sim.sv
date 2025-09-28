@@ -16,7 +16,11 @@ initial begin
     $display("Starting FTDI simulation");
     #100ns;
     u_um232h_bfm.rst();
-    #100us;
+    #100ns;
+    // u_um232h_bfm.display_sig();
+    u_um232h_bfm.send_nop();
+    #100ns;
+    // u_um232h_bfm.display_sig();
     $display("Finishing FTDI simulation");
     $finish();
 end 

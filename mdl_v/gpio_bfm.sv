@@ -12,8 +12,6 @@ module gpio_bfm
     ,output [C_GPIO_WIDTH-1:0] gpio_o
 );
 
-always_comb begin
-    $monitor("GPIO: %h", gpio_i);
-end
+initial $monitor("GPIO: %h", gpio_i);
 
 endmodule
