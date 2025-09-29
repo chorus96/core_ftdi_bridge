@@ -144,8 +144,7 @@ begin
 
     case (current_state_q)
     STATE_IDLE : if (rx_ready_w) next_state_d = STATE_CMD;
-    STATE_CMD :
-    begin
+    STATE_CMD : begin
         if (data_rx_w[`CMD_R] == CMD_NOP) begin
             $display("NOP command received");
             next_state_d  = STATE_IDLE;
@@ -159,32 +158,28 @@ begin
         else
             next_state_d  = STATE_IDLE;
     end
-    STATE_LEN : if (rx_ready_w) next_state_d  = STATE_ADDR0;
+    STATE_LEN   : if (rx_ready_w) next_state_d  = STATE_ADDR0;
     STATE_ADDR0 : if (rx_ready_w) next_state_d  = STATE_ADDR1;
     STATE_ADDR1 : if (rx_ready_w) next_state_d  = STATE_ADDR2;
     STATE_ADDR2 : if (rx_ready_w) next_state_d  = STATE_ADDR3;
-    STATE_ADDR3 :
-    begin
+    STATE_ADDR3 : begin
         if (rx_ready_w && mem_wr_q) 
             next_state_d  = STATE_WRITE;
         else if (rx_ready_w) 
             next_state_d  = STATE_READ;            
     end
-    STATE_WRITE :
-    begin
+    STATE_WRITE : begin
         if (len_q == {LEN_W{1'b0}} && (mem_bvalid_i || magic_addr_w))
             next_state_d  = STATE_IDLE;
         else
             next_state_d  = STATE_WRITE;
     end
-    STATE_READ :
-    begin
+    STATE_READ : begin
         // Data ready
         if (mem_rvalid_i || magic_addr_w)
             next_state_d  = STATE_DATA0;
     end
-    STATE_DATA0 :
-    begin
+    STATE_DATA0 : begin
         if (read_skip_w)
             next_state_d  = STATE_DATA1;
         else if (wr_accept_w && (len_q == {LEN_W{1'b0}}))
@@ -192,8 +187,7 @@ begin
         else if (wr_accept_w)
             next_state_d  = STATE_DATA1;
     end
-    STATE_DATA1 :
-    begin
+    STATE_DATA1 : begin
         if (read_skip_w)
             next_state_d  = STATE_DATA2;
         else if (wr_accept_w && (len_q == {LEN_W{1'b0}}))
@@ -201,8 +195,7 @@ begin
         else if (wr_accept_w)
             next_state_d  = STATE_DATA2;
     end
-    STATE_DATA2 :
-    begin
+    STATE_DATA2 : begin
         if (read_skip_w)
             next_state_d  = STATE_DATA3;
         else if (wr_accept_w && (len_q == {LEN_W{1'b0}}))
@@ -210,20 +203,17 @@ begin
         else if (wr_accept_w)
             next_state_d  = STATE_DATA3;
     end
-    STATE_DATA3 :
-    begin
+    STATE_DATA3 : begin
         if (wr_accept_w && (len_q != {LEN_W{1'b0}}))
             next_state_d  = STATE_READ;
         else if (wr_accept_w)
             next_state_d  = STATE_IDLE;
     end
-    STATE_GP_WR :
-    begin
+    STATE_GP_WR : begin
         if (rx_ready_w)
             next_state_d  = STATE_IDLE;
     end
-    STATE_GP_RD :
-    begin
+    STATE_GP_RD : begin
         if (wr_accept_w)
             next_state_d  = STATE_IDLE;
     end
@@ -373,13 +363,10 @@ begin
 end
 
 always @ (posedge clk_i or posedge rst_i)
-if (rst_i)
-begin
+if (rst_i) begin
     mem_awvalid_q <= 1'b0;
     mem_wvalid_q  <= 1'b0;
-end
-else
-begin
+end else begin
     mem_awvalid_q <= mem_awvalid_r;
     mem_wvalid_q  <= mem_wvalid_r;
 end

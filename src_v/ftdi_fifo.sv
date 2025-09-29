@@ -8,10 +8,10 @@ module ftdi_fifo #(
 )(
      input  logic               clk_i
     ,input  logic               rst_i   
-    ,input  logic [WIDTH-1:0]   data_in_i
+    ,input  logic [  WIDTH-1:0] data_in_i
     ,input  logic               push_i
     ,input  logic               pop_i  
-    ,output logic [WIDTH-1:0]   data_out_o
+    ,output logic [  WIDTH-1:0] data_out_o
     ,output logic               accept_o
     ,output logic               valid_o
     ,output logic [COUNT_W-1:0] level_o

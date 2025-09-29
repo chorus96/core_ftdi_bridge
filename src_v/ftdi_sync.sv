@@ -73,7 +73,7 @@ wire rx_full_next_w = (rx_level_w >= 7'd63);
 //-----------------------------------------------------------------
 // Defines / Local params
 //-----------------------------------------------------------------
-localparam STATE_W           = 2;
+localparam STATE_W = 2;
 typedef enum logic [STATE_W-1:0] {
      STATE_IDLE = 2'd0
     ,STATE_TX   = 2'd1
@@ -82,8 +82,8 @@ typedef enum logic [STATE_W-1:0] {
 state_e current_state_q, next_state_d;
 
 wire rx_space_w = rx_accept_w;
-wire rx_ready_w = !ftdi_rxf_i;
-wire tx_space_w = !ftdi_txe_i;
+wire rx_ready_w = ~ftdi_rxf_i;
+wire tx_space_w = ~ftdi_txe_i;
 
 reg  tx_valid_q;
 assign tx_accept_w = !tx_valid_q || (current_state_q == STATE_TX && tx_space_w);
@@ -96,22 +96,19 @@ always_comb begin // Next State Logic
     next_state_d = current_state_q;
 
     case (current_state_q)
-    STATE_IDLE :
-    begin
+    STATE_IDLE: begin
         if (rx_ready_w && rx_space_w)
-            next_state_d    = STATE_RX;
+            next_state_d = STATE_RX;
         else if (tx_space_w && (tx_valid_w || tx_valid_q))
-            next_state_d    = STATE_TX;
+            next_state_d = STATE_TX;
     end
-    STATE_RX :
-    begin
+    STATE_RX: begin
         if (!rx_ready_w || rx_full_next_w)
-            next_state_d  = STATE_IDLE;
+            next_state_d = STATE_IDLE;
     end
-    STATE_TX :
-    begin
+    STATE_TX: begin
         if (!tx_space_w || tx_empty_next_w)
-            next_state_d  = STATE_IDLE;
+            next_state_d = STATE_IDLE;
     end    
     default:
         ;
