@@ -79,7 +79,7 @@ localparam STATE_DATA2      = 4'd11;
 localparam STATE_DATA3      = 4'd12;
 localparam STATE_GP_WR      = 4'd13;
 localparam STATE_GP_RD      = 4'd14;
-// typedef enum logic [3:0] {
+// typedef enum logic [4-1:0] {
 //     STATE_IDLE       = 4'd0;
 //     STATE_CMD        = 4'd1;
 //     STATE_LEN        = 4'd2;
@@ -110,7 +110,7 @@ wire                rx_ready_w;
 wire                read_skip_w;
 
 // Current state
-reg [STATE_W-1:0]   state_q;
+reg [STATE_W-1:0]   current_state_q;
 
 // Transfer length (for WB read / writes)
 reg [LEN_W-1:0]     len_q;
@@ -137,95 +137,95 @@ wire magic_addr_w = (mem_addr_q == 32'd4026531840);
 //-----------------------------------------------------------------
 // Next State Logic
 //-----------------------------------------------------------------
-reg [STATE_W-1:0] next_state_r;
+reg [STATE_W-1:0] next_state_d;
 always @ *
 begin
-    next_state_r = state_q;
+    next_state_d = current_state_q;
 
-    case (state_q)
-    STATE_IDLE : if (rx_ready_w) next_state_r = STATE_CMD;
+    case (current_state_q)
+    STATE_IDLE : if (rx_ready_w) next_state_d = STATE_CMD;
     STATE_CMD :
     begin
         if (data_rx_w[`CMD_R] == CMD_NOP) begin
             $display("NOP command received");
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
         end else if (data_rx_w[`CMD_R] == CMD_WR || data_rx_w[`CMD_R] == CMD_RD)
-            next_state_r  = STATE_LEN;
+            next_state_d  = STATE_LEN;
         else if (data_rx_w[`CMD_R] == CMD_GP_WR) begin
             $display("GP_WR command received");
-            next_state_r  = STATE_GP_WR;
+            next_state_d  = STATE_GP_WR;
         end else if (data_rx_w[`CMD_R] == CMD_GP_RD)
-            next_state_r  = STATE_GP_RD;
+            next_state_d  = STATE_GP_RD;
         else
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
     end
-    STATE_LEN : if (rx_ready_w) next_state_r  = STATE_ADDR0;
-    STATE_ADDR0 : if (rx_ready_w) next_state_r  = STATE_ADDR1;
-    STATE_ADDR1 : if (rx_ready_w) next_state_r  = STATE_ADDR2;
-    STATE_ADDR2 : if (rx_ready_w) next_state_r  = STATE_ADDR3;
+    STATE_LEN : if (rx_ready_w) next_state_d  = STATE_ADDR0;
+    STATE_ADDR0 : if (rx_ready_w) next_state_d  = STATE_ADDR1;
+    STATE_ADDR1 : if (rx_ready_w) next_state_d  = STATE_ADDR2;
+    STATE_ADDR2 : if (rx_ready_w) next_state_d  = STATE_ADDR3;
     STATE_ADDR3 :
     begin
         if (rx_ready_w && mem_wr_q) 
-            next_state_r  = STATE_WRITE;
+            next_state_d  = STATE_WRITE;
         else if (rx_ready_w) 
-            next_state_r  = STATE_READ;            
+            next_state_d  = STATE_READ;            
     end
     STATE_WRITE :
     begin
         if (len_q == {LEN_W{1'b0}} && (mem_bvalid_i || magic_addr_w))
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
         else
-            next_state_r  = STATE_WRITE;
+            next_state_d  = STATE_WRITE;
     end
     STATE_READ :
     begin
         // Data ready
         if (mem_rvalid_i || magic_addr_w)
-            next_state_r  = STATE_DATA0;
+            next_state_d  = STATE_DATA0;
     end
     STATE_DATA0 :
     begin
         if (read_skip_w)
-            next_state_r  = STATE_DATA1;
+            next_state_d  = STATE_DATA1;
         else if (wr_accept_w && (len_q == {LEN_W{1'b0}}))
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
         else if (wr_accept_w)
-            next_state_r  = STATE_DATA1;
+            next_state_d  = STATE_DATA1;
     end
     STATE_DATA1 :
     begin
         if (read_skip_w)
-            next_state_r  = STATE_DATA2;
+            next_state_d  = STATE_DATA2;
         else if (wr_accept_w && (len_q == {LEN_W{1'b0}}))
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
         else if (wr_accept_w)
-            next_state_r  = STATE_DATA2;
+            next_state_d  = STATE_DATA2;
     end
     STATE_DATA2 :
     begin
         if (read_skip_w)
-            next_state_r  = STATE_DATA3;
+            next_state_d  = STATE_DATA3;
         else if (wr_accept_w && (len_q == {LEN_W{1'b0}}))
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
         else if (wr_accept_w)
-            next_state_r  = STATE_DATA3;
+            next_state_d  = STATE_DATA3;
     end
     STATE_DATA3 :
     begin
         if (wr_accept_w && (len_q != {LEN_W{1'b0}}))
-            next_state_r  = STATE_READ;
+            next_state_d  = STATE_READ;
         else if (wr_accept_w)
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
     end
     STATE_GP_WR :
     begin
         if (rx_ready_w)
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
     end
     STATE_GP_RD :
     begin
         if (wr_accept_w)
-            next_state_r  = STATE_IDLE;
+            next_state_d  = STATE_IDLE;
     end
     default:
         ;
@@ -233,29 +233,29 @@ begin
 end
 
 always @ (posedge clk_i or posedge rst_i) // Update state
-if (rst_i) state_q <= STATE_IDLE;
-else       state_q <= next_state_r;
+if (rst_i) current_state_q <= STATE_IDLE;
+else       current_state_q <= next_state_d;
 
 //-----------------------------------------------------------------
 // RD/WR to and from async FTDI I/F
 //-----------------------------------------------------------------
 
 // Write to FTDI interface in the following states
-assign wr_w = (state_q == STATE_DATA0) |
-              (state_q == STATE_DATA1) |
-              (state_q == STATE_DATA2) |
-              (state_q == STATE_DATA3) | 
-              (state_q == STATE_GP_RD) && !read_skip_w;
+assign wr_w = (current_state_q == STATE_DATA0) |
+              (current_state_q == STATE_DATA1) |
+              (current_state_q == STATE_DATA2) |
+              (current_state_q == STATE_DATA3) | 
+              (current_state_q == STATE_GP_RD) && !read_skip_w;
 
 // Accept data in the following states
-assign rd_w = (state_q == STATE_CMD) |
-              (state_q == STATE_LEN) |
-              (state_q == STATE_ADDR0) |
-              (state_q == STATE_ADDR1) |
-              (state_q == STATE_ADDR2) |
-              (state_q == STATE_ADDR3) |
-              (state_q == STATE_WRITE && !mem_cyc_q) |
-              (state_q == STATE_GP_WR);
+assign rd_w = (current_state_q == STATE_CMD) |
+              (current_state_q == STATE_LEN) |
+              (current_state_q == STATE_ADDR0) |
+              (current_state_q == STATE_ADDR1) |
+              (current_state_q == STATE_ADDR2) |
+              (current_state_q == STATE_ADDR3) |
+              (current_state_q == STATE_WRITE && !mem_cyc_q) |
+              (current_state_q == STATE_GP_WR);
 
 //-----------------------------------------------------------------
 // Capture length
@@ -263,15 +263,15 @@ assign rd_w = (state_q == STATE_CMD) |
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     len_q       <= {LEN_W{1'b0}};
-else if (state_q == STATE_CMD && rx_ready_w)
+else if (current_state_q == STATE_CMD && rx_ready_w)
     len_q[11:8] <= data_rx_w[`LEN_UPPER_R];
-else if (state_q == STATE_LEN && rx_ready_w)
+else if (current_state_q == STATE_LEN && rx_ready_w)
     len_q[7:0]  <= data_rx_w[`LEN_LOWER_R];
-else if (state_q == STATE_WRITE && rx_ready_w && !mem_cyc_q)
+else if (current_state_q == STATE_WRITE && rx_ready_w && !mem_cyc_q)
     len_q       <= len_q - {{(LEN_W-1){1'b0}}, 1'b1};
-else if (state_q == STATE_READ && ((mem_cyc_q && mem_rvalid_i) || magic_addr_w))
+else if (current_state_q == STATE_READ && ((mem_cyc_q && mem_rvalid_i) || magic_addr_w))
     len_q       <= len_q - {{(LEN_W-1){1'b0}}, 1'b1};
-else if (((state_q == STATE_DATA0) || (state_q == STATE_DATA1) || (state_q == STATE_DATA2)) && wr_accept_w && !read_skip_w)
+else if (((current_state_q == STATE_DATA0) || (current_state_q == STATE_DATA1) || (current_state_q == STATE_DATA2)) && wr_accept_w && !read_skip_w)
     len_q       <= len_q - {{(LEN_W-1){1'b0}}, 1'b1};
 
 //-----------------------------------------------------------------
@@ -280,18 +280,18 @@ else if (((state_q == STATE_DATA0) || (state_q == STATE_DATA1) || (state_q == ST
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     mem_addr_q        <= 'd0;
-else if (state_q == STATE_ADDR0 && rx_ready_w)
+else if (current_state_q == STATE_ADDR0 && rx_ready_w)
     mem_addr_q[31:24] <= data_rx_w;
-else if (state_q == STATE_ADDR1 && rx_ready_w)
+else if (current_state_q == STATE_ADDR1 && rx_ready_w)
     mem_addr_q[23:16] <= data_rx_w;
-else if (state_q == STATE_ADDR2 && rx_ready_w)
+else if (current_state_q == STATE_ADDR2 && rx_ready_w)
     mem_addr_q[15:8]  <= data_rx_w;
-else if (state_q == STATE_ADDR3 && rx_ready_w)
+else if (current_state_q == STATE_ADDR3 && rx_ready_w)
     mem_addr_q[7:0]   <= data_rx_w;
 // Address increment on every access issued
-else if (state_q == STATE_WRITE && (mem_cyc_q && mem_bvalid_i))
+else if (current_state_q == STATE_WRITE && (mem_cyc_q && mem_bvalid_i))
     mem_addr_q        <= {mem_addr_q[31:2], 2'b0} + 'd4;
-else if (state_q == STATE_READ && (mem_cyc_q && mem_rvalid_i))
+else if (current_state_q == STATE_READ && (mem_cyc_q && mem_rvalid_i))
     mem_addr_q        <= {mem_addr_q[31:2], 2'b0} + 'd4;
 
 //-----------------------------------------------------------------
@@ -300,11 +300,11 @@ else if (state_q == STATE_READ && (mem_cyc_q && mem_rvalid_i))
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     data_idx_q <= 2'b0;
-else if (state_q == STATE_ADDR3)
+else if (current_state_q == STATE_ADDR3)
     data_idx_q <= data_rx_w[1:0];
-else if (state_q == STATE_WRITE && rx_ready_w && !mem_cyc_q)
+else if (current_state_q == STATE_WRITE && rx_ready_w && !mem_cyc_q)
     data_idx_q <= data_idx_q + 2'd1;
-else if (((state_q == STATE_DATA0) || (state_q == STATE_DATA1) || (state_q == STATE_DATA2)) && wr_accept_w && (data_idx_q != 2'b0))
+else if (((current_state_q == STATE_DATA0) || (current_state_q == STATE_DATA1) || (current_state_q == STATE_DATA2)) && wr_accept_w && (data_idx_q != 2'b0))
     data_idx_q <= data_idx_q - 2'd1;
 
 assign read_skip_w = (data_idx_q != 2'b0);
@@ -316,10 +316,10 @@ always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     data_q <= 32'b0;
 // In idle state, just sample GPIO inputs flops in-case of reads
-else if (state_q == STATE_IDLE)
+else if (current_state_q == STATE_IDLE)
     data_q <= {{(32-GP_INPUTS){1'b0}}, gp_in_q};
 // Write to memory
-else if (state_q == STATE_WRITE && rx_ready_w && !mem_cyc_q)
+else if (current_state_q == STATE_WRITE && rx_ready_w && !mem_cyc_q)
 begin
     case (data_idx_q)
         2'd0: data_q[7:0]   <= data_rx_w;
@@ -329,10 +329,10 @@ begin
     endcase
 end
 // Read from memory
-else if (state_q == STATE_READ && mem_rvalid_i)
+else if (current_state_q == STATE_READ && mem_rvalid_i)
     data_q <= mem_rdata_i;
 // Shift data out (read response -> FTDI)
-else if (((state_q == STATE_DATA0) || (state_q == STATE_DATA1) || (state_q == STATE_DATA2)) && (wr_accept_w || read_skip_w))
+else if (((current_state_q == STATE_DATA0) || (current_state_q == STATE_DATA1) || (current_state_q == STATE_DATA2)) && (wr_accept_w || read_skip_w))
     data_q <= {8'b0, data_q[31:8]};
 
 assign data_tx_w  = data_q[7:0];
@@ -359,7 +359,7 @@ begin
     else if (mem_awvalid_o)
         mem_awvalid_r = 1'b0;
     // Every 4th byte, issue bus access
-    else if (state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
+    else if (current_state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
         mem_awvalid_r = !magic_addr_w;
 
     // Hold
@@ -368,7 +368,7 @@ begin
     else if (mem_wvalid_o)
         mem_wvalid_r = 1'b0;
     // Every 4th byte, issue bus access
-    else if (state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
+    else if (current_state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
         mem_wvalid_r = !magic_addr_w;
 end
 
@@ -409,7 +409,7 @@ begin
         mem_arvalid_r = mem_arvalid_q;
     else if (mem_arvalid_o)
         mem_arvalid_r = 1'b0;
-    else if (state_q == STATE_READ && !mem_cyc_q)
+    else if (current_state_q == STATE_READ && !mem_cyc_q)
         mem_arvalid_r = !magic_addr_w;
 end
 
@@ -456,10 +456,10 @@ always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     mem_sel_q    <= 4'b0;
 // Idle - reset for read requests
-else if (state_q == STATE_IDLE)
+else if (current_state_q == STATE_IDLE)
     mem_sel_q   <= 4'b1111;
 // Every 4th byte, issue bus access
-else if (state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
+else if (current_state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
     mem_sel_q   <= mem_sel_r;
 
 assign mem_wstrb_o  = mem_sel_q;
@@ -470,7 +470,7 @@ assign mem_wstrb_o  = mem_sel_q;
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     mem_wr_q    <= 1'b0;
-else if (state_q == STATE_CMD && rx_ready_w)
+else if (current_state_q == STATE_CMD && rx_ready_w)
     mem_wr_q    <= (data_rx_w[`CMD_R] == CMD_WR);
 
 //-----------------------------------------------------------------
@@ -492,7 +492,7 @@ reg gpio_wr_q;
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     gpio_wr_q <= 1'b0;
-else if (magic_addr_w && state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
+else if (magic_addr_w && current_state_q == STATE_WRITE && rx_ready_w && (data_idx_q == 2'd3 || len_q == 1))
     gpio_wr_q <= 1'b1;
 else
     gpio_wr_q <= 1'b0;
@@ -500,7 +500,7 @@ else
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)
     gp_out_q <= {(GP_OUTPUTS){1'b0}};
-else if (state_q == STATE_GP_WR && rx_ready_w)
+else if (current_state_q == STATE_GP_WR && rx_ready_w)
     gp_out_q <= {{(GP_OUTPUTS-8){1'b0}}, data_rx_w};
 else if (gpio_wr_q)
     gp_out_q <= data_q[GP_OUTPUTS-1:0];
@@ -515,7 +515,7 @@ always @ *
 begin
     // GPIO inputs can be normal or pulse capture with clear on read.
     // GP_IN_EVENT_MASK indicates which are 'pulse capture' ones.
-    if ((state_q == STATE_GP_RD) && wr_accept_w)
+    if ((current_state_q == STATE_GP_RD) && wr_accept_w)
         gp_in_r = gp_inputs_i;
     else
         gp_in_r = (gp_in_q & GP_IN_EVENT_MASK) | gp_inputs_i;
