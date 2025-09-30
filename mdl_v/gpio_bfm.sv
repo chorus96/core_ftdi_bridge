@@ -13,5 +13,6 @@ module gpio_bfm
 );
 
 initial $monitor("GPIO: %h", gpio_i);
+// initial $monitor("GPIO: %h", gpio_o);
 
 endmodule

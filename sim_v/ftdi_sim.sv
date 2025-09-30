@@ -22,6 +22,8 @@ initial begin
     #100ns;
     u_um232h_bfm.send_gpio();
     #100ns;
+    u_um232h_bfm.read_gpio();
+    #100ns;
     // u_um232h_bfm.display_sig();
     $display("Finishing FTDI simulation");
     $finish();

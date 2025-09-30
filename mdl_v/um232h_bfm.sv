@@ -74,6 +74,21 @@ begin
 end
 endtask
 
+task read_gpio;
+begin
+    @(negedge ftdi_clk_o);
+    ftdi_rxf_o = 0;
+    ftdi_data_r[`CMD_R] = CMD_GP_RD;
+    @(posedge ftdi_clk_o);
+    wait(ftdi_rdn_i == 0);
+    @(posedge ftdi_clk_o);
+    ftdi_data_r[`LEN_LOWER_R] = 8'hFF;
+    @(posedge ftdi_clk_o);
+    @(negedge ftdi_clk_o);
+    ftdi_rxf_o = 1;  
+end
+endtask
+
 // task send_nop;
 // begin
 //     // ftdi_txe_o = 1;
